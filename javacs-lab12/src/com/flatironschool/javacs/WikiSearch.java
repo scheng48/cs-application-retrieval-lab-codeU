@@ -46,7 +46,7 @@ public class WikiSearch {
 	 * 
 	 * @param map
 	 */
-	private  void print() {
+	private void print() {
 		List<Entry<String, Integer>> entries = sort();
 		for (Entry<String, Integer> entry: entries) {
 			System.out.println(entry);
@@ -60,8 +60,13 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch or(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+        Map<String, Integer> unionMap = new HashMap<String, Integer>(map);
+        // iterate through that map and add them to get everything in both sets
+        for(String key: that.map.keySet()) {
+        	int combine = totalRelevance(this.getRelevance(key), that.getRelevance(key));
+        	unionMap.put(key, combine);
+        }
+		return new WikiSearch(unionMap);
 	}
 	
 	/**
@@ -71,19 +76,32 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch and(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+        Map<String, Integer> intersectionMap = new HashMap<String, Integer>();
+
+        for(String key: that.map.keySet()) {
+        	if(map.containsKey(key)) {
+        		int combine = totalRelevance(this.getRelevance(key), that.getRelevance(key));
+        		intersectionMap.put(key, combine);
+        	}
+        }
+		return new WikiSearch(intersectionMap);
 	}
 	
 	/**
-	 * Computes the intersection of two search results.
+	 * Computes the results of this search result without contents of that search result.
 	 * 
 	 * @param that
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch minus(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+        Map<String, Integer> notThatMap = new HashMap<String, Integer>(map);
+
+        for(String key: that.map.keySet()) {
+        	if(map.containsKey(key)) {
+        		Integer removed = notThatMap.remove(key);
+        	}
+        }
+		return new WikiSearch(notThatMap);
 	}
 	
 	/**
@@ -104,8 +122,24 @@ public class WikiSearch {
 	 * @return List of entries with URL and relevance.
 	 */
 	public List<Entry<String, Integer>> sort() {
-        // FILL THIS IN!
-		return null;
+        // list of entries from our map, let's pull them out
+		List<Entry<String, Integer>> entryList = new LinkedList<Entry<String, Integer>>(map.entrySet());
+
+		Comparator<Entry<String, Integer>> comparator = new Comparator<Entry<String, Integer>>() {
+			@Override
+			public int compare(Entry<String, Integer> entry1, Entry<String, Integer> entry2) {
+				if(entry1.getValue() < entry2.getValue()) {
+					return -1;
+				}
+				if(entry2.getValue() < entry1.getValue()) {
+					return 1;
+				}
+				return 0;
+			}
+		};
+
+		Collections.sort(entryList, comparator);
+		return entryList;
 	}
 
 	/**
